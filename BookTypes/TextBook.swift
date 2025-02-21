@@ -1,5 +1,5 @@
 //
-//  TextBook.swift
+//  BaseTextBook.swift
 //  L01_BookShelfConsole
 //
 //  Created by Gleb on 14.02.2025.
@@ -7,13 +7,21 @@
 
 import Foundation
 
-protocol TextBook: Book {
-    var id: UUID { get }
-    var courseYear: Int { get }
-    var title: String { get }
-    var author: String { get }
-    var publicationYear: Date { get }
-    var genre: Genre { get }
+struct TextBook: TextBookProtocol {
+    var id: UUID
+    var courseYear: Int
+    var title: String
+    var author: String
+    var publicationYear: Date
+    var genre: Genre
     
-    func display()
+    func display() {
+        print("ID: \(self.id)")
+        print("Title: \(self.title)")
+        print("Course Year: \(self.courseYear)")
+        print("Author: \(self.author)")
+        print("Publication Year: \(self.publicationYear)")
+        print("Genre: \(self.genre)")
+        print("")
+    }
 }

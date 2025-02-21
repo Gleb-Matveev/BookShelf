@@ -7,24 +7,14 @@
 
 import Foundation
 
-/*
-var bookShelf1 = BookShelf(_books: bookShelf.getByCreteria(creteria: {(book: any Book) -> Bool in
-    if book.title == "Dad" || book.title == "Mother" {
-        return true
-    } else {
-        return false
-    }
-}))
-*/
-
-var book1 = BaseBook(id: UUID.init(), title: "Three friends", author: "Glebka", publicationYear: Date(), genre: Genre.novel)
-var book2 = BaseBook(id: UUID.init(), title: "Laptop", author: "Misha", publicationYear: Date(), genre: Genre.mystery)
-var book3 = BaseBook(id: UUID.init(), title: "Cable", author: "Kirill", publicationYear: Date(), genre: Genre.novel)
-var book4 = BaseBook(id: UUID.init(), title: "Mother", author: "Razor", publicationYear: Date(), genre: Genre.novel)
-var book5 = BaseBook(id: UUID.init(), title: "Dad", author: "Agro", publicationYear: Date(), genre: Genre.thriller)
-var book6 = BaseBook(id: UUID.init(), title: "Doctor", author: "Masha", publicationYear: Date(), genre: Genre.fiction)
-var comics = BaseComics(id: UUID.init(), issueNumber: 30, title: "Doctor", author: "Masha", publicationYear: Date(), genre: Genre.fiction)
-var textBook = BaseTextBook(id: UUID.init(), courseYear: 4, title: "Doctor", author: "Masha", publicationYear: Date(), genre: Genre.fiction)
+var book1 = Book(id: UUID.init(), title: "Three friends", author: "Glebka", publicationYear: Date(), genre: Genre.novel)
+var book2 = Book(id: UUID.init(), title: "Laptop", author: "Misha", publicationYear: Date(), genre: Genre.mystery)
+var book3 = Book(id: UUID.init(), title: "Cable", author: "Kirill", publicationYear: Date(), genre: Genre.novel)
+var book4 = Book(id: UUID.init(), title: "Mother", author: "Razor", publicationYear: Date(), genre: Genre.novel)
+var book5 = Book(id: UUID.init(), title: "Dad", author: "Agro", publicationYear: Date(), genre: Genre.thriller)
+var book6 = Book(id: UUID.init(), title: "Doctor", author: "Masha", publicationYear: Date(), genre: Genre.fiction)
+var comics = Comics(id: UUID.init(), issueNumber: 30, title: "Doctor", author: "Masha", publicationYear: Date(), genre: Genre.fiction)
+var textBook = TextBook(id: UUID.init(), courseYear: 4, title: "Doctor", author: "Masha", publicationYear: Date(), genre: Genre.fiction)
 var bookShelf = BookShelf(_books: [book1.id: book1,
                                    book2.id: book2,
                                    book3.id: book3,
@@ -38,11 +28,12 @@ var isRunning = true
 print("1 - Add Book\n2 - Delete Book\n3 - Show Books\n4 - Choose by creteria\n5 - Exit")
 var input = readLine()
 
-
 while (isRunning)
 {
     switch input {
     case "1":
+        print("Please choose what exctly you want to add: (1 - Book, 2 - Comics, 3 - TextBook)")
+        let type = readLine()
         print("Please input Title:")
         let title = readLine()
         print("Please input Author:")
@@ -51,8 +42,29 @@ while (isRunning)
         let genre = readLine()
         
         if title != nil && author != nil && genre != nil {
-            let newBook = BaseBook(id: UUID.init(), title: title!, author: author!, publicationYear: Date(), genre: Genre(name: genre!))
-            bookShelf.add(book: newBook)
+            switch type {
+            case "1":
+                let newBook = Book(id: UUID.init(), title: title!, author: author!, publicationYear: Date(), genre: Genre(name: genre!))
+                bookShelf.add(book: newBook)
+            case "2":
+                print("Please input issue number: ")
+                if let str_in = readLine() {
+                    if let issueNumber = Int(str_in) {
+                        let newBook = Comics(id: UUID.init(), issueNumber: issueNumber, title: title!, author: author!, publicationYear: Date(), genre: Genre(name: genre!))
+                        bookShelf.add(book: newBook)
+                    }
+                }
+            case "3":
+                print("Please input course year: ")
+                if let str_cy = readLine() {
+                    if let courseYear = Int(str_cy) {
+                        let newBook = TextBook(id: UUID.init(), courseYear: courseYear, title: title!, author: author!, publicationYear: Date(), genre: Genre(name: genre!))
+                        bookShelf.add(book: newBook)
+                    }
+                }
+            default:
+                print("Sorry wrong incomplete or wrong input\n")
+            }
         } else {
             print("Sorry wrong incomplete or wrong input\n")
         }
@@ -73,16 +85,13 @@ while (isRunning)
     case "4":
         print("Input condition: ")
         if let condition = readLine() {
-            let conditions = ParseCondition(condition: condition)
-            let scc: SequenceClosureCreator = SequenceClosureCreator()
-            if conditions != nil {
-                if let uconditions = conditions {
-                    let closures = scc.SequenceClosureCreate(conditions: uconditions.0, logicOps: uconditions.1)
-                    let bookShelf1 = BookShelf(_books: bookShelf.getByCreteria(creteria: closures))
-                    print("\nBooks that meat your criteria: ")
-                    bookShelf1.display()
+            if case .success(let parsed_conditions) = ParseCondition(condition: condition) {
+                if let closure_seq = ClosureSequenceCreate(conditions: parsed_conditions.0, logicOps: parsed_conditions.1) {
+                    let bookShelfTmp = BookShelf(_books: bookShelf.getByCreteria(creteria: closure_seq))
+                    bookShelfTmp.display()
                 }
             }
+            
         }
     case "5":
         exit(0)

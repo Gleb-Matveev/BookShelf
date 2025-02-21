@@ -7,23 +7,29 @@
 
 import Foundation
 
-func ParseCondition(condition: String) -> ([Condition], [LogicOp])? {
-    var res: [Condition] = []
+enum ParsingError: Error {
+    case NoSuchValue
+    case WrongNumberOfArgs
+    case InvalidInput
+}
+
+func ParseCondition(condition: String) -> Result<([Condition], [LogicOp]), ParsingError> {
+    var cnds: [Condition] = []
     var lps: [LogicOp] = []
-    let tokens = condition.components(separatedBy: " ")
-    var ptr: Int = 0
     var sign: Sign
     var prop: Property
+    var ptr: Int = 0
     var n: Int = 0
     
+    let tokens = condition.components(separatedBy: " ")
+    
     if ((tokens.count + 1) % 4 != 0) {
-        return nil;
+        return Result.failure(ParsingError.WrongNumberOfArgs);
     } else {
         n = (tokens.count + 1) / 4
     }
         
-    for _ in 0...n {
-        ptr += 4
+    for k in 0...n {
         switch tokens[ptr] {
         case "Title":
             prop = .Title("")
@@ -34,18 +40,18 @@ func ParseCondition(condition: String) -> ([Condition], [LogicOp])? {
         case "Genre":
             prop = .Genre(Genre.fiction)
         default:
-            return nil
+            return Result.failure(ParsingError.InvalidInput)
         }
         
         switch tokens[ptr + 1] {
-        case "==":
+        case "=":
             sign = .eq
         case "<":
             sign = .lt
         case ">":
             sign = .gt
         default:
-            return nil
+            return Result.failure(ParsingError.InvalidInput)
         }
         
         switch prop {
@@ -59,21 +65,25 @@ func ParseCondition(condition: String) -> ([Condition], [LogicOp])? {
             if let date = dateFormatter.date(from: tokens[ptr + 2]) {
                 prop = .PubYear(date)
             } else {
-                return nil;
+                return Result.failure(ParsingError.InvalidInput)
             }
         case .Genre(_):
             let a: Genre  = Genre.init(name: tokens[ptr + 2])
             if (a != .none) {
                 prop = .Genre(a)
             } else {
-                return nil
+                return Result.failure(ParsingError.InvalidInput)
             }
         }
         
-        res.append(Condition(sign: sign, prop: prop))
+        if let cnd = Condition(_sign: sign, _prop: prop) {
+            cnds.append(cnd)
+        } else {
+            return Result.failure(ParsingError.InvalidInput)
+        }
         
-        if (n == 1) {
-            return (res, lps)
+        if (n == 1 || k == n - 1) {
+            return Result.success((cnds, lps))
         } else {
             switch tokens[ptr + 3] {
             case "&&":
@@ -81,10 +91,12 @@ func ParseCondition(condition: String) -> ([Condition], [LogicOp])? {
             case "||":
                 lps.append(LogicOp.or)
             default:
-                return nil;
+                return Result.failure(ParsingError.InvalidInput)
             }
         }
+        
+        ptr += 4
     }
     
-    return (res, lps)
+    return Result.success((cnds, lps))
 }

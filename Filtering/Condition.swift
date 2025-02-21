@@ -24,47 +24,57 @@ struct Condition {
     var sign: Sign
     var prop: Property
     
-    // init() проверка на возможноссть существования
+    init?(_sign: Sign, _prop: Property) {
+        if _sign == .gt || _sign == .lt {
+            if case .PubYear = _prop {
+                self.sign = _sign
+                self.prop = _prop
+            } else {
+                return nil
+            }
+        }
+        
+        self.sign = _sign
+        self.prop = _prop
+    }
 }
 
 extension Condition {
-    func createClosure() -> (Book) -> Bool {
+    func createClosure() -> ((BookProtocol) -> Bool)? {
         switch sign {
         case .gt:
             if case let .PubYear(pubYear) = prop {
-                return { (book: Book) -> Bool in
+                return {(book: BookProtocol) -> Bool in
                     return book.publicationYear > pubYear
                 }
             }
         case .lt:
             if case let .PubYear(pubYear) = prop {
-                return { (book: Book) -> Bool in
+                return { (book: BookProtocol) -> Bool in
                     return book.publicationYear < pubYear
                 }
             }
         case .eq:
             switch prop {
             case .Title(let title):
-                return { (book: Book) -> Bool in
+                return { (book: BookProtocol) -> Bool in
                     return book.title == title
                 }
             case .Author(let author):
-                return { (book: Book) -> Bool in
+                return { (book: BookProtocol) -> Bool in
                     return book.author == author
                 }
             case .PubYear(let pubYear):
-                return { (book: Book) -> Bool in
+                return { (book: BookProtocol) -> Bool in
                     return book.publicationYear == pubYear
                 }
             case .Genre(let genre):
-                return { (book: Book) -> Bool in
+                return { (book: BookProtocol) -> Bool in
                     return book.genre == genre
                 }
             }
         }
-        // поменять
-        return { (book: Book) -> Bool in
-            return true
-        }
+        
+        return nil
     }
 }
