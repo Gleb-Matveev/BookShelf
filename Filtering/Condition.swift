@@ -14,10 +14,10 @@ enum Sign {
 }
 
 enum Property {
-    case Title(String)
-    case Author(String)
-    case PubYear(Date)
-    case Genre(Genre)
+    case title(String)
+    case author(String)
+    case pubYear(Date)
+    case genre(Genre)
 }
 
 struct Condition {
@@ -26,7 +26,7 @@ struct Condition {
     
     init?(_sign: Sign, _prop: Property) {
         if _sign == .gt || _sign == .lt {
-            if case .PubYear = _prop {
+            if case .pubYear = _prop {
                 self.sign = _sign
                 self.prop = _prop
             } else {
@@ -43,32 +43,32 @@ extension Condition {
     func createClosure() -> ((BookProtocol) -> Bool)? {
         switch sign {
         case .gt:
-            if case let .PubYear(pubYear) = prop {
+            if case let .pubYear(pubYear) = prop {
                 return {(book: BookProtocol) -> Bool in
                     return book.publicationYear > pubYear
                 }
             }
         case .lt:
-            if case let .PubYear(pubYear) = prop {
+            if case let .pubYear(pubYear) = prop {
                 return { (book: BookProtocol) -> Bool in
                     return book.publicationYear < pubYear
                 }
             }
         case .eq:
             switch prop {
-            case .Title(let title):
+            case .title(let title):
                 return { (book: BookProtocol) -> Bool in
                     return book.title == title
                 }
-            case .Author(let author):
+            case .author(let author):
                 return { (book: BookProtocol) -> Bool in
                     return book.author == author
                 }
-            case .PubYear(let pubYear):
+            case .pubYear(let pubYear):
                 return { (book: BookProtocol) -> Bool in
                     return book.publicationYear == pubYear
                 }
-            case .Genre(let genre):
+            case .genre(let genre):
                 return { (book: BookProtocol) -> Bool in
                     return book.genre == genre
                 }

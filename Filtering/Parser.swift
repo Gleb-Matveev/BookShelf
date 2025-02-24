@@ -8,9 +8,9 @@
 import Foundation
 
 enum ParsingError: Error {
-    case NoSuchValue
-    case WrongNumberOfArgs
-    case InvalidInput
+    case noSuchValue
+    case wrongNumberOfArgs
+    case invalidInput
 }
 
 func ParseCondition(condition: String) -> Result<([Condition], [LogicOp]), ParsingError> {
@@ -24,7 +24,7 @@ func ParseCondition(condition: String) -> Result<([Condition], [LogicOp]), Parsi
     let tokens = condition.components(separatedBy: " ")
     
     if ((tokens.count + 1) % 4 != 0) {
-        return Result.failure(ParsingError.WrongNumberOfArgs);
+        return Result.failure(ParsingError.wrongNumberOfArgs);
     } else {
         n = (tokens.count + 1) / 4
     }
@@ -32,15 +32,15 @@ func ParseCondition(condition: String) -> Result<([Condition], [LogicOp]), Parsi
     for k in 0...n {
         switch tokens[ptr] {
         case "Title":
-            prop = .Title("")
+            prop = .title("")
         case "Author":
-            prop = .Author("")
+            prop = .author("")
         case "PubYear":
-            prop = .PubYear(Date.init())
+            prop = .pubYear(Date.init())
         case "Genre":
-            prop = .Genre(Genre.fiction)
+            prop = .genre(Genre.fiction)
         default:
-            return Result.failure(ParsingError.InvalidInput)
+            return Result.failure(ParsingError.invalidInput)
         }
         
         switch tokens[ptr + 1] {
@@ -51,35 +51,35 @@ func ParseCondition(condition: String) -> Result<([Condition], [LogicOp]), Parsi
         case ">":
             sign = .gt
         default:
-            return Result.failure(ParsingError.InvalidInput)
+            return Result.failure(ParsingError.invalidInput)
         }
         
         switch prop {
-        case .Title(_):
-            prop = .Title(tokens[ptr + 2])
-        case .Author(_):
-            prop = .Author(tokens[ptr + 2])
-        case .PubYear(_):
+        case .title(_):
+            prop = .title(tokens[ptr + 2])
+        case .author(_):
+            prop = .author(tokens[ptr + 2])
+        case .pubYear(_):
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd"
             if let date = dateFormatter.date(from: tokens[ptr + 2]) {
-                prop = .PubYear(date)
+                prop = .pubYear(date)
             } else {
-                return Result.failure(ParsingError.InvalidInput)
+                return Result.failure(ParsingError.invalidInput)
             }
-        case .Genre(_):
+        case .genre(_):
             let a: Genre  = Genre.init(name: tokens[ptr + 2])
             if (a != .none) {
-                prop = .Genre(a)
+                prop = .genre(a)
             } else {
-                return Result.failure(ParsingError.InvalidInput)
+                return Result.failure(ParsingError.invalidInput)
             }
         }
         
         if let cnd = Condition(_sign: sign, _prop: prop) {
             cnds.append(cnd)
         } else {
-            return Result.failure(ParsingError.InvalidInput)
+            return Result.failure(ParsingError.invalidInput)
         }
         
         if (n == 1 || k == n - 1) {
@@ -91,7 +91,7 @@ func ParseCondition(condition: String) -> Result<([Condition], [LogicOp]), Parsi
             case "||":
                 lps.append(LogicOp.or)
             default:
-                return Result.failure(ParsingError.InvalidInput)
+                return Result.failure(ParsingError.invalidInput)
             }
         }
         
